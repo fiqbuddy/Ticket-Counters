@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Queue Management System
 
-## Getting Started
+A modern, responsive queue management system built with Next.js, TypeScript, and Material-UI. This application provides an intuitive interface for both customers and managers to handle queue operations efficiently.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Customer View
+- Take a new queue number with animated feedback
+- Real-time display of currently serving number
+- Visual status of all service counters
+- Animated counter displays with status indicators
+- Responsive design for all screen sizes
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Manager View
+- Toggle counter status (online/offline)
+- Monitor queue status and waiting numbers
+- Serve next customer in queue
+- Complete current service
+- Real-time queue management
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Technologies Used
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Frontend Framework:** Next.js 14
+- **Language:** TypeScript
+- **UI Framework:** Material-UI (MUI)
+- **Styling:** Styled Components with MUI
+- **State Management:** React useState
+- **Animations:** CSS Keyframes & MUI Transitions
 
-## Learn More
+## 🏃‍♂️ Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository
 
-## Deploy on Vercel
+2. Install dependencies
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Run the development server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 💻 Usage
+
+### Customer Interface
+- Click "Take a Number" to get a new queue number
+- Monitor your position through the "Now Serving" display
+- Check counter status through the visual indicators
+  - 🟢 Green: Counter is online and available
+  - 🔴 Red: Counter is currently serving
+  - ⚫ Grey: Counter is offline
+
+### Manager Interface
+- Switch to manager view using the toggle button
+- Control counter status using the switches
+- Manage queue flow with "Serve Next" and "Complete" buttons
+- Monitor waiting queue and current service status
+
+## 🎨 Customization
+
+The application uses Material-UI's theming system and styled-components for styling. You can customize the appearance by:
+
+- Modifying the gradient colors in `StyledTicketButton`
+- Adjusting animations in the `pulse` keyframes
+- Updating the theme colors and shadows
+- Customizing the Paper components' styling
+
+## 📱 Responsive Design
+
+The application is fully responsive and works on:
+- Desktop computers
+- Tablets
+- Mobile devices
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
