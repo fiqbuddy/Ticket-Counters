@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-// Styled components and animations
+
 const pulse = keyframes`
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
@@ -79,7 +79,7 @@ export default function Home() {
   ]);
   const [ticketTaken, setTicketTaken] = useState(false);
 
-  // Animation effect when taking a ticket
+  
   useEffect(() => {
     if (ticketTaken) {
       const timer = setTimeout(() => setTicketTaken(false), 1000);
