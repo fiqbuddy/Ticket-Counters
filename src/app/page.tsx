@@ -1,101 +1,319 @@
-import Image from "next/image";
+'use client';
+import { useState, useEffect } from "react";
+import { 
+  Button,
+  Paper,
+  Box,
+  Grid,
+  Typography,
+  Badge,
+  Container,
+  Switch,
+  keyframes,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+// Styled components and animations
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
+
+const StyledTicketButton = styled(Button)(({ theme }) => ({
+  padding: '20px 40px',
+  fontSize: '1.2rem',
+  borderRadius: '15px',
+  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+  boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
+  transition: 'transform 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-3px)',
+    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+  },
+}));
+
+const AnimatedPaper = styled(Paper)(({ theme }) => ({
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: theme.shadows[10],
+  },
+}));
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%',
+    boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+  },
+}));
+
+const NumberDisplay = styled(Typography)(({ theme }) => ({
+  fontSize: '2.5rem',
+  fontWeight: 'bold',
+  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  animation: `${pulse} 2s infinite ease-in-out`,
+}));
+
+interface Counter {
+  id: number;
+  isOnline: boolean;
+  currentTicket: number | null;
+  isServing: boolean;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [view, setView] = useState<'customer' | 'manager'>('customer');
+  const [lastTicketNumber, setLastTicketNumber] = useState(0);
+  const [currentlyServing, setCurrentlyServing] = useState<number | null>(null);
+  const [waitingQueue, setWaitingQueue] = useState<number[]>([]);
+  const [counters, setCounters] = useState<Counter[]>([
+    { id: 1, isOnline: true, currentTicket: null, isServing: false },
+    { id: 2, isOnline: true, currentTicket: null, isServing: false },
+    { id: 3, isOnline: true, currentTicket: null, isServing: false },
+    { id: 4, isOnline: true, currentTicket: null, isServing: false },
+  ]);
+  const [ticketTaken, setTicketTaken] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // Animation effect when taking a ticket
+  useEffect(() => {
+    if (ticketTaken) {
+      const timer = setTimeout(() => setTicketTaken(false), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [ticketTaken]);
+
+  const takeTicket = () => {
+    const newTicketNumber = lastTicketNumber + 1;
+    setLastTicketNumber(newTicketNumber);
+    setWaitingQueue([...waitingQueue, newTicketNumber]);
+  };
+
+  const toggleCounterStatus = (counterId: number) => {
+    setCounters(counters.map(counter => 
+      counter.id === counterId 
+        ? { ...counter, isOnline: !counter.isOnline, isServing: false, currentTicket: null }
+        : counter
+    ));
+  };
+
+  const serveNextCustomer = (counterId: number) => {
+    if (waitingQueue.length === 0) return;
+
+    const nextTicket = waitingQueue[0];
+    const newWaitingQueue = waitingQueue.slice(1);
+
+    setWaitingQueue(newWaitingQueue);
+    setCurrentlyServing(nextTicket);
+    setCounters(counters.map(counter =>
+      counter.id === counterId
+        ? { ...counter, currentTicket: nextTicket, isServing: true }
+        : counter
+    ));
+  };
+
+  const completeService = (counterId: number) => {
+    setCounters(counters.map(counter =>
+      counter.id === counterId
+        ? { ...counter, currentTicket: null, isServing: false }
+        : counter
+    ));
+  };
+
+  const handleTakeTicket = () => {
+    takeTicket();
+    setTicketTaken(true);
+  };
+
+  return (
+    <Container maxWidth="lg">
+      <Box sx={{ py: 6, minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 4 }}>
+          <Button
+            variant="contained"
+            sx={{
+              borderRadius: '20px',
+              background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+              boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+            }}
+            onClick={() => setView(view === 'customer' ? 'manager' : 'customer')}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            Switch to {view === 'customer' ? 'Manager' : 'Customer'} View
+          </Button>
+        </Box>
+
+        {view === 'customer' ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <AnimatedPaper 
+              elevation={6}
+              sx={{ 
+                p: 4,
+                maxWidth: 600,
+                mx: 'auto',
+                textAlign: 'center',
+                borderRadius: '20px',
+                background: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h5" sx={{ mb: 2, color: '#666' }}>
+                  Now Serving:
+                </Typography>
+                <NumberDisplay>
+                  {currentlyServing || '-'}
+                </NumberDisplay>
+                <Typography variant="h5" sx={{ mt: 3, mb: 2, color: '#666' }}>
+                  Last Number:
+                </Typography>
+                <NumberDisplay>
+                  {lastTicketNumber || '-'}
+                </NumberDisplay>
+              </Box>
+              <StyledTicketButton
+                onClick={handleTakeTicket}
+                sx={{
+                  transform: ticketTaken ? 'scale(0.95)' : 'scale(1)',
+                }}
+              >
+                Take a Number
+              </StyledTicketButton>
+            </AnimatedPaper>
+
+            <Grid container spacing={3}>
+              {counters.map((counter) => (
+                <Grid item xs={3} key={counter.id}>
+                  <AnimatedPaper
+                    elevation={4}
+                    sx={{
+                      p: 3,
+                      opacity: counter.isOnline ? 1 : 0.7,
+                      borderRadius: '15px',
+                      background: counter.isServing 
+                        ? 'linear-gradient(to right bottom, #ffffff, #f0f7ff)'
+                        : 'white',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <StyledBadge
+                        variant="dot"
+                        sx={{
+                          '& .MuiBadge-badge': {
+                            backgroundColor: !counter.isOnline
+                              ? '#9e9e9e'
+                              : counter.isServing
+                              ? '#f50057'
+                              : '#4caf50',
+                          },
+                        }}
+                      />
+                      <Typography 
+                        variant="h6"
+                        sx={{ 
+                          fontWeight: 'bold',
+                          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}
+                      >
+                        Counter {counter.id}
+                      </Typography>
+                    </Box>
+                    <Typography 
+                      variant="h4" 
+                      align="center"
+                      sx={{ 
+                        mt: 2,
+                        fontWeight: 'bold',
+                        color: counter.isServing ? '#f50057' : '#666',
+                      }}
+                    >
+                      {!counter.isOnline ? 'Offline' : counter.currentTicket || '-'}
+                    </Typography>
+                  </AnimatedPaper>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Paper elevation={3} sx={{ p: 3 }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>Queue Status</Typography>
+              <Grid container spacing={4}>
+                <Grid item>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                    Waiting Numbers:
+                  </Typography>
+                  <Typography variant="body1">
+                    {waitingQueue.join(', ') || 'Empty'}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                    Currently Serving:
+                  </Typography>
+                  <Typography variant="body1">
+                    {currentlyServing || 'None'}
+                  </Typography>
+                </Grid>
+              </Grid>
+            </Paper>
+
+            <Grid container spacing={3}>
+              {counters.map((counter) => (
+                <Grid item xs={12} md={4} key={counter.id}>
+                  <Paper elevation={3} sx={{ p: 3 }}>
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                      Counter {counter.id}
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography>Status:</Typography>
+                        <Switch
+                          checked={counter.isOnline}
+                          onChange={() => toggleCounterStatus(counter.id)}
+                          color="success"
+                        />
+                      </Box>
+
+                      {counter.isOnline && (
+                        <>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography>Current Ticket:</Typography>
+                            <Typography>{counter.currentTicket || 'None'}</Typography>
+                          </Box>
+
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+                            <Button
+                              variant="contained"
+                              onClick={() => serveNextCustomer(counter.id)}
+                              disabled={!counter.isOnline || counter.isServing}
+                            >
+                              Serve Next
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="success"
+                              onClick={() => completeService(counter.id)}
+                              disabled={!counter.isServing}
+                            >
+                              Complete
+                            </Button>
+                          </Box>
+                        </>
+                      )}
+                    </Box>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+      </Box>
+    </Container>
   );
 }
